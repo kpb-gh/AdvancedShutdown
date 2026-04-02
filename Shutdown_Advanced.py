@@ -29,7 +29,7 @@ def Execute(shutdown_mode, exit_on_end):
         shutdown_cmdlet = "/s"
         if (shutdown_mode == "hibernate"):
             shutdown_cmdlet = "/h"
-        call(str.split(f"shutdown {shutdown_cmdlet}"))
+        call(str.split(f"shutdown {shutdown_cmdlet} /t 0"))
         print(f"Successfully activated at {GetTime()}")
         if exit_on_end:
             exit()
