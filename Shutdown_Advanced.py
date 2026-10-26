@@ -1,5 +1,6 @@
 # Advanced system hibernation script
-# Currently Windows only
+# Currently Windows/Linux
+#   WARN: Linux support is UNTESTED!
 # Author: kpb-gh
 # Optional: desktop-notifier (install via pip)
 #   Provides system notifications.
@@ -8,6 +9,7 @@ from subprocess import call
 from time import sleep, gmtime, strftime
 import asyncio
 from datetime import time
+from platform import system
 
 NOTIF_AV = False
 try:
@@ -35,7 +37,7 @@ async def NotifyUser(notify_time, shutdown_mode):
 def Execute(shutdown_mode, exit_on_end):
     if (shutdown_mode == "k"):
         print(f"Successfully activated at {GetTime()}")
-    else:
+    else if (system() == "Windows":
         shutdown_cmdlet = "/s"
         if (shutdown_mode == "hibernate"):
             shutdown_cmdlet = "/h"
@@ -43,6 +45,9 @@ def Execute(shutdown_mode, exit_on_end):
         print(f"Successfully activated at {GetTime()}")
         if exit_on_end:
             exit()
+    else if (system() == "Linux"):
+        shutdown_cmdlet = "shutdown -P now"
+        call(str.split(shutdown_cmdlet)) #hibernate unsupported, requires root by default
 
 async def GetUserInput():
     shutdown_mode = ""
@@ -58,18 +63,20 @@ async def GetUserInput():
         in_warn = int_TryParse(input("Time for warning: "))
         if (in_warn != None) and (in_warn > 0):
             notify_time = in_warn
-        in_mode = input("Program mode? (S)hutdown/(h)ibernate/test(K): ").lower()
+        in_mode = input("Program mode? (S)hutdown/(h)ibernate/warn(K): ").lower()
         if (in_mode == "h") or (in_mode == "hibernate"):
             shutdown_mode = "hibernate"
+            if (system() == "Linux"):
+                print("WARNING: Hibernate on Linux is not supported. System will instead SHUT DOWN!")
         elif (in_mode == "k"):
-            shutdown_mode = "k" # test only
+            shutdown_mode = "k" # warn only
         else:
             shutdown_mode = "shutdown"
         # Quick Setup
     else:
         exit_on_end = True
         notify_time = 10
-        shutdown_mode = "hibernate"
+        shutdown_mode = "shutdown"
     # Both
     in_delay = int_TryParse(input("Time to shutdown: "))
     if (in_delay != None) and (in_delay > 0):
