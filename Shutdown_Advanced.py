@@ -1,12 +1,21 @@
 # Advanced system hibernation script
 # Currently Windows only
 # Author: kpb-gh
-# Requires win11toast (install via pip)
+# Optional: desktop-notifier (install via pip)
+#   Provides system notifications.
 
 from subprocess import call
 from time import sleep, gmtime, strftime
-from win11toast import notify
+import asyncio
 from datetime import time
+
+NOTIF_AV = False
+try:
+    from desktop_notifier import DesktopNotifier
+    NOTIFIER = DesktopNotifier(app_name="ShutdownAdvanced")
+    NOTIF_AV = True
+except: 
+    print("Notifications unavailable. Possibly not installed.")
 
 def int_TryParse(string):
     try:
@@ -17,10 +26,11 @@ def int_TryParse(string):
 def GetTime():
     return strftime("%Y-%m-%d %H-%M-%S", gmtime())
 
-def NotifyUser(notify_time, shutdown_mode):
+async def NotifyUser(notify_time, shutdown_mode):
     warn_message = f"WARNING: {shutdown_mode} scheduled in {str(notify_time)} seconds. SAVE ANY WORK NOW!"
-    notify(warn_message)
     print(warn_message)
+    if (NOTIF_AV):
+        await NOTIFIER.send(title="Shutdown Imminent", message=warn_message)
 
 def Execute(shutdown_mode, exit_on_end):
     if (shutdown_mode == "k"):
@@ -34,7 +44,7 @@ def Execute(shutdown_mode, exit_on_end):
         if exit_on_end:
             exit()
 
-def GetUserInput():
+async def GetUserInput():
     shutdown_mode = ""
     exit_on_end = True
     notify_time = 10
@@ -48,11 +58,11 @@ def GetUserInput():
         in_warn = int_TryParse(input("Time for warning: "))
         if (in_warn != None) and (in_warn > 0):
             notify_time = in_warn
-        in_mode = input("Program mode? (S)hutdown/(h)ibernate: ").lower()
+        in_mode = input("Program mode? (S)hutdown/(h)ibernate/test(K): ").lower()
         if (in_mode == "h") or (in_mode == "hibernate"):
             shutdown_mode = "hibernate"
         elif (in_mode == "k"):
-            shutdown_mode = "k" # TODO what's this called again?
+            shutdown_mode = "k" # test only
         else:
             shutdown_mode = "shutdown"
         # Quick Setup
@@ -65,19 +75,19 @@ def GetUserInput():
     if (in_delay != None) and (in_delay > 0):
         delay = in_delay
     print(f"Starting countdown at {GetTime()}; d={delay}, n={notify_time}, m={shutdown_mode}, e={exit_on_end}")
-    Countdown(delay, notify_time, shutdown_mode, exit_on_end)
+    await Countdown(delay, notify_time, shutdown_mode, exit_on_end)
 
-def Countdown(delay, notify_time, shutdown_mode, exit_on_end):
+async def Countdown(delay, notify_time, shutdown_mode, exit_on_end):
     warned = False
     for x in range(delay):
         if (warned == False) and (delay - x < notify_time):
-            NotifyUser(notify_time, shutdown_mode)
+            await NotifyUser(notify_time, shutdown_mode)
             warned = True
         sleep(1)
     Execute(shutdown_mode, exit_on_end)
 
-def Main():
+async def Main():
     while True:
-        GetUserInput()
+        await GetUserInput()
 
-Main()
+asyncio.run(Main())
