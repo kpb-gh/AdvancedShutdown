@@ -37,7 +37,7 @@ async def NotifyUser(notify_time, shutdown_mode):
 def Execute(shutdown_mode, exit_on_end):
     if (shutdown_mode == "k"):
         print(f"Successfully activated at {GetTime()}")
-    else if (system() == "Windows":
+    elif (system() == "Windows":
         shutdown_cmdlet = "/s"
         if (shutdown_mode == "hibernate"):
             shutdown_cmdlet = "/h"
@@ -45,7 +45,7 @@ def Execute(shutdown_mode, exit_on_end):
         print(f"Successfully activated at {GetTime()}")
         if exit_on_end:
             exit()
-    else if (system() == "Linux"):
+    elif (system() == "Linux"):
         shutdown_cmdlet = "shutdown -P now"
         call(str.split(shutdown_cmdlet)) #hibernate unsupported, requires root by default
 
