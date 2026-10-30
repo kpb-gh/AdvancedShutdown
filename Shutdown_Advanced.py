@@ -37,7 +37,7 @@ async def NotifyUser(notify_time, shutdown_mode):
 def Execute(shutdown_mode, exit_on_end):
     if (shutdown_mode == "k"):
         print(f"Successfully activated at {GetTime()}")
-    elif (system() == "Windows":
+    elif (system() == "Windows"):
         shutdown_cmdlet = "/s"
         if (shutdown_mode == "hibernate"):
             shutdown_cmdlet = "/h"
